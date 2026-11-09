@@ -352,3 +352,175 @@ st.caption(
     "데이터 출처: UCI In-Vehicle Coupon Recommendation | "
     "예측 모델: XGBoost"
 )
+
+# ==========================================
+# 9. 상황 A/B 비교 시뮬레이터
+# ==========================================
+
+st.divider()
+st.header("⑤ 상황 A/B 비교 시뮬레이터")
+
+st.write(
+    "동일한 소비자의 개인 특성과 소비습관을 유지하면서 "
+    "이동 목적지, 동행자, 이동시간을 변경해 "
+    "쿠폰별 예측 수락확률을 비교합니다."
+)
+
+col_a, col_b = st.columns(2)
+
+# 상황 A 입력
+with col_a:
+    st.subheader("상황 A")
+
+    dest_a = st.selectbox(
+        "이동 목적지 A",
+        ["No Urgent Place", "Home", "Work"],
+        key="dest_a"
+    )
+
+    passenger_a = st.selectbox(
+        "동행자 A",
+        ["Alone", "Friend(s)", "Partner", "Kid(s)"],
+        index=1,
+        key="passenger_a"
+    )
+
+    travel_a = st.selectbox(
+        "이동시간 A",
+        ["15분 미만", "15~25분 미만", "25분 이상"],
+        key="travel_a"
+    )
+
+# 상황 B 입력
+with col_b:
+    st.subheader("상황 B")
+
+    dest_b = st.selectbox(
+        "이동 목적지 B",
+        ["No Urgent Place", "Home", "Work"],
+        index=2,
+        key="dest_b"
+    )
+
+    passenger_b = st.selectbox(
+        "동행자 B",
+        ["Alone", "Friend(s)", "Partner", "Kid(s)"],
+        key="passenger_b"
+    )
+
+    travel_b = st.selectbox(
+        "이동시간 B",
+        ["15분 미만", "15~25분 미만", "25분 이상"],
+        index=2,
+        key="travel_b"
+    )
+
+# 상황별 입력 데이터 생성
+def make_scenario(coupon, dest, passenger, travel):
+
+    # 기존 입력 함수 재사용
+    data = make_input(coupon).copy()
+
+    # 변경할 상황 변수
+    data["destination"] = dest
+    data["passanger"] = passenger
+
+    # 이동시간에 따른 변수 설정
+    if travel == "15분 미만":
+        data["toCoupon_GEQ15min"] = 0
+        data["toCoupon_GEQ25min"] = 0
+
+    elif travel == "15~25분 미만":
+        data["toCoupon_GEQ15min"] = 1
+        data["toCoupon_GEQ25min"] = 0
+
+    else:
+        data["toCoupon_GEQ15min"] = 1
+        data["toCoupon_GEQ25min"] = 1
+
+    return data[features]
+
+
+# A/B 예측 실행
+if st.button("🔍 상황 A/B 비교 분석하기"):
+
+    comparison_results = []
+
+    for coupon in coupon_types:
+
+        input_a = make_scenario(
+            coupon, dest_a, passenger_a, travel_a
+        )
+
+        input_b = make_scenario(
+            coupon, dest_b, passenger_b, travel_b
+        )
+
+        prob_a = model.predict_proba(input_a)[0, 1] * 100
+        prob_b = model.predict_proba(input_b)[0, 1] * 100
+
+        comparison_results.append({
+            "쿠폰 종류": coupon,
+            "상황 A (%)": round(prob_a, 2),
+            "상황 B (%)": round(prob_b, 2),
+            "변화량 (%p)": round(prob_b - prob_a, 2)
+        })
+
+    comparison_df = pd.DataFrame(comparison_results)
+
+    st.subheader("상황별 쿠폰 수락확률 비교")
+
+    st.dataframe(
+        comparison_df,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    # 비교 그래프
+    st.subheader("상황별 예측확률 그래프")
+
+    chart_df = comparison_df.set_index("쿠폰 종류")[
+        ["상황 A (%)", "상황 B (%)"]
+    ]
+
+    st.bar_chart(chart_df)
+
+    # 변화량 그래프
+    st.subheader("상황 변화에 따른 예측확률 차이")
+
+    st.bar_chart(
+        comparison_df.set_index("쿠폰 종류")[
+            "변화량 (%p)"
+        ]
+    )
+
+    # 각 상황에서 가장 높은 확률의 쿠폰
+    best_a = comparison_df.loc[
+        comparison_df["상황 A (%)"].idxmax()
+    ]
+
+    best_b = comparison_df.loc[
+        comparison_df["상황 B (%)"].idxmax()
+    ]
+
+    result_a, result_b = st.columns(2)
+
+    with result_a:
+        st.metric(
+            "상황 A 최고 예측확률",
+            f"{best_a['상황 A (%)']:.2f}%"
+        )
+        st.write("추천 쿠폰:", best_a["쿠폰 종류"])
+
+    with result_b:
+        st.metric(
+            "상황 B 최고 예측확률",
+            f"{best_b['상황 B (%)']:.2f}%"
+        )
+        st.write("추천 쿠폰:", best_b["쿠폰 종류"])
+
+    st.caption(
+        "두 상황의 차이는 모델의 가상 입력에 대한 "
+        "예측확률 차이이며 실제 행동 변화의 인과적 "
+        "효과를 의미하지 않습니다."
+    )
