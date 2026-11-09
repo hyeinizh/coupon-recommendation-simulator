@@ -79,25 +79,38 @@ with col1:
         ]
     )
 
+    
     occupation = st.selectbox(
         "직업",
         [
-            "Unemployed",
-            "Student",
-            "Computer & Mathematical",
-            "Education&Training&Library",
-            "Office & Administrative Support",
-            "Management",
-            "Sales & Related",
+            "Architecture & Engineering",
+            "Arts Design Entertainment Sports & Media",
+            "Building & Grounds Cleaning & Maintenance",
             "Business & Financial",
+            "Community & Social Services",
+            "Computer & Mathematical",
+            "Construction & Extraction",
+            "Education&Training&Library",
+            "Farming Fishing & Forestry",
+            "Food Preparation & Serving Related",
             "Healthcare Practitioners & Technical",
             "Healthcare Support",
-            "Arts Design Entertainment Sports & Media",
-            "Food Preparation & Serving Related",
+            "Installation Maintenance & Repair",
+            "Legal",
+            "Life Physical Social Science",
+            "Management",
+            "Office & Administrative Support",
+            "Personal Care & Service",
+            "Production Occupations",
+            "Protective Service",
+            "Retired",
+            "Sales & Related",
+            "Student",
             "Transportation & Material Moving",
-            "Other"
+            "Unemployed"
         ]
     )
+
 
 with col2:
     marital_status = st.selectbox(
