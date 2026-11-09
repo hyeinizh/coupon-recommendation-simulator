@@ -147,13 +147,16 @@ with col2:
 
 st.header("② 평소 소비습관")
 
+
 habit_options = [
     "never",
     "less1",
     "1~3",
     "4~8",
-    "gt8"
+    "gt8",
+    "Unknown"
 ]
+
 
 h1, h2, h3 = st.columns(3)
 
