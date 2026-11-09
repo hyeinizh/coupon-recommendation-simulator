@@ -476,6 +476,7 @@ if st.button("🔍 상황 A/B 비교 분석하기"):
         hide_index=True
     )
 
+
     # 비교 그래프
     st.subheader("상황별 예측확률 그래프")
 
@@ -483,12 +484,11 @@ if st.button("🔍 상황 A/B 비교 분석하기"):
         ["상황 A (%)", "상황 B (%)"]
     ]
 
-    
-st.bar_chart(
-    chart_df,
-    stack=False,
-    y_label="예측 수락확률 (%)"
-)
+    st.bar_chart(
+        chart_df,
+        stack=False,
+        y_label="예측 수락확률 (%)"
+    )
 
     # 변화량 그래프
     st.subheader("상황 변화에 따른 예측확률 차이")
@@ -498,6 +498,7 @@ st.bar_chart(
             "변화량 (%p)"
         ]
     )
+
 
     # 각 상황에서 가장 높은 확률의 쿠폰
     best_a = comparison_df.loc[
