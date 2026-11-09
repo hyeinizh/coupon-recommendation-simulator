@@ -490,7 +490,6 @@ st.bar_chart(
     y_label="예측 수락확률 (%)"
 )
 
-
     # 변화량 그래프
     st.subheader("상황 변화에 따른 예측확률 차이")
 
