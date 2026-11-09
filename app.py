@@ -483,7 +483,13 @@ if st.button("🔍 상황 A/B 비교 분석하기"):
         ["상황 A (%)", "상황 B (%)"]
     ]
 
-    st.bar_chart(chart_df)
+    
+st.bar_chart(
+    chart_df,
+    stack=False,
+    y_label="예측 수락확률 (%)"
+)
+
 
     # 변화량 그래프
     st.subheader("상황 변화에 따른 예측확률 차이")
